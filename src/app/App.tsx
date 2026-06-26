@@ -115,8 +115,16 @@ const SPENDING_DATA = [
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const fmt = (n: number) => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n);
-const fmtD = (n: number) => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+const CURRENCIES: Record<string, {code:string, locale:string}> = {
+  USD:{code:"USD",locale:"en-US"}, EUR:{code:"EUR",locale:"de-DE"},
+  GBP:{code:"GBP",locale:"en-GB"}, JPY:{code:"JPY",locale:"ja-JP"},
+  CAD:{code:"CAD",locale:"en-CA"}, AUD:{code:"AUD",locale:"en-AU"},
+  PKR:{code:"PKR",locale:"en-PK"},
+};
+let activeCurrency = "PKR";
+const fmt = (n: number) => { const c=CURRENCIES[activeCurrency]; return new Intl.NumberFormat(c.locale,{style:"currency",currency:c.code,maximumFractionDigits:0}).format(n); };
+const fmtD = (n: number) => { const c=CURRENCIES[activeCurrency]; return new Intl.NumberFormat(c.locale,{style:"currency",currency:c.code,minimumFractionDigits:2,maximumFractionDigits:2}).format(n); };
+
 const fmtDate = (d: string) => new Date(d + "T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
 const uid = () => Math.random().toString(36).slice(2,10);
 const catColor = (c: string) => CAT_COLORS[c] || "#94a3b8";
@@ -1389,12 +1397,12 @@ function SettingsView({isDark,setIsDark}:{isDark:boolean;setIsDark:(v:boolean)=>
           <div className="bg-white dark:bg-[#111c2d] border border-black/[0.07] dark:border-white/[0.07] rounded-2xl p-6 space-y-5">
             {[
               {label:"Currency", sub:"Primary currency for display", child:(
-                <Select value={currency} onValueChange={setCurrency}>
+                <Select defaultValue="PKR" onValueChange={(v)=>{ activeCurrency=v; }}>
                   <SelectTrigger className="h-10 w-40 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-sm">
                     <SelectValue/>
                   </SelectTrigger>
                   <SelectContent>
-                    {["USD","EUR","GBP","JPY","CAD","AUD"].map(c=><SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    {["USD","EUR","GBP","JPY","CAD","AUD","PKR"].map(c=><SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
               )},
